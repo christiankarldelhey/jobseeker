@@ -1,0 +1,79 @@
+# Empresas objetivo: ats + token (el "slug" de la empresa en ese ATS).
+#
+# Formato:
+#   - company: Nombre para mostrar
+#     ats: greenhouse | lever | ashby | workable | recruitee | smartrecruiters | personio
+#     token: el slug/token de la empresa en ese ATS
+#
+# Los dos de abajo están VERIFICADOS (probados y funcionando).
+# Agregá más manualmente o corré `python -m jobwatch.discover <dominio>` para
+# intentar resolverlos automáticamente. Lo que no se resuelva cae en unresolved.csv.
+
+companies:
+  - company: Typeform
+    ats: greenhouse
+    token: typeform
+
+  - company: Holded
+    ats: recruitee
+    token: holded
+
+  - company: GoCardless
+    ats: greenhouse
+    token: gocardless
+
+  - company: Monzo
+    ats: greenhouse
+    token: monzo
+
+  - company: Supabase
+    ats: ashby
+    token: supabase
+
+  - company: Webflow
+    ats: greenhouse
+    token: webflow
+
+  - company: Contentsquare
+    ats: lever
+    token: contentsquare
+
+  - company: Figma
+    ats: greenhouse
+    token: figma
+
+  - company: Notion
+    ats: ashby
+    token: notion
+
+  - company: Front
+    ats: ashby
+    token: frontcareers
+
+  - company: Calendly
+    ats: greenhouse
+    token: calendly
+
+  - company: Paddle
+    ats: ashby
+    token: paddle
+
+  - company: Grafana Labs
+    ats: greenhouse
+    token: grafanalabs
+
+  - company: Render
+    ats: ashby
+    token: render
+
+  - company: PlanetScale
+    ats: greenhouse
+    token: planetscale
+
+  # Ejemplos a probar / verificar vos mismo (no confirmados):
+  # - company: NombreEmpresa
+  #   ats: lever
+  #   token: nombreempresa
+  # - company: OtraEmpresa
+  #   ats: ashby
+  #   token: otraempresa

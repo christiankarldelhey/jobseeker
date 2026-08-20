@@ -1,0 +1,105 @@
+# Perfil de búsqueda. Editá este archivo para cambiar stack/seniority/geo
+# sin tocar código Python. match.py lee esto en cada corrida.
+
+# Si el título/ubicación/descripción contiene cualquiera de estas palabras,
+# la oferta se descarta directamente sin importar el score.
+hard_exclude:
+  - intern
+  - internship
+  - becari
+  - becario
+  - becaria
+  - prácticas
+  - junior
+  - trainee
+  - wordpress
+  - .net
+  - java developer
+  - devops engineer
+  - data engineer
+
+# Palabras clave de stack técnico y su peso en el score. Basado en el CV:
+# Senior Front-End (Vue 3/TS) con React/RN intermedio, Node.js backend,
+# testing (Vitest/Playwright/Jest) y experiencia geoespacial/AI-augmented dev.
+stack:
+  vue: 5
+  vue.js: 5
+  nuxt: 4
+  composition api: 4
+  pinia: 3
+  typescript: 4
+  frontend: 3
+  front-end: 3
+  front end: 3
+  javascript: 1
+  react: 2
+  react native: 2
+  node: 2
+  node.js: 2
+  design system: 2
+  feature-sliced: 2
+  vitest: 1
+  playwright: 1
+  geospatial: 2
+  postgis: 1
+  websocket: 1
+  generative ai: 1
+  agentic: 1
+  laravel: 1
+  php: 1
+
+# Palabras clave de seniority y su peso.
+seniority:
+  senior: 4
+  lead: 2
+  staff: 2
+  principal: 2
+  mid-level: 1
+
+# Palabras clave de geografía y su peso. Abierto a mudanza dentro de la UE,
+# así que remote/EU/España pesan parecido — no se prioriza solo Barcelona.
+geo:
+  remote: 3
+  fully remote: 3
+  emea: 2
+  remote europe: 3
+  remote eu: 3
+  barcelona: 2
+  madrid: 2
+  spain: 2
+  españa: 2
+  european union: 2
+  netherlands: 2
+  germany: 2
+  portugal: 2
+  ireland: 2
+  france: 1
+  italy: 1
+  poland: 1
+  amsterdam: 2
+  berlin: 2
+  lisbon: 2
+  dublin: 2
+
+# Control de antigüedad. Ofertas sin fecha conocida (algunos ATS no la
+# exponen) nunca se filtran por estas reglas, ya que no se puede verificar
+# su antigüedad -- se muestran igual, marcadas como "fecha desconocida".
+#
+# - stale_after_days: entre este valor y max_age_days, una oferta que
+#   calificaría como "immediate" se degrada a "digest" (sigue llegando, pero
+#   sin urgencia) -- rescata ofertas viejas que siguen abiertas sin
+#   interrumpirte como si fueran nuevas.
+# - max_age_days: más allá de esto, la oferta se descarta directamente
+#   (probablemente cubierta o el ATS ya no la mantiene actualizada).
+stale_after_days: 30
+max_age_days: 45
+
+# Umbrales de score para decidir cómo notificar.
+thresholds:
+  immediate: 8   # score >= este valor -> email inmediato
+  digest: 5      # score >= este valor (pero < immediate) -> entra en el digest diario
+
+# Cada cuántos minutos correr el poller (usado como referencia; el cron real
+# se define en .github/workflows/poll.yml). Corre cada hora, activo de
+# 07:00 a 23:00 hora local, en pausa de 00:00 a 07:00.
+poll_interval_minutes: 60
