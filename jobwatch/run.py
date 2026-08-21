@@ -6,6 +6,7 @@ Usage:
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -31,7 +32,10 @@ def main() -> int:
 
     registry = load_registry()
     match_cfg = MatchConfig.load(ROOT / "config.yaml")
-    store = Store(ROOT / "jobwatch.db")
+    # JOBWATCH_DB_PATH lets you point at a scratch copy of jobwatch.db for
+    # testing (e.g. dry runs) without marking real jobs as seen/notified.
+    db_path = os.environ.get("JOBWATCH_DB_PATH", str(ROOT / "jobwatch.db"))
+    store = Store(db_path)
 
     notify_enabled = True
     try:

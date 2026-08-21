@@ -70,6 +70,13 @@ companies:
     ats: greenhouse
     token: planetscale
 
+  # Tecnoempleo es distinto al resto: no es un ATS por empresa, es un
+  # buscador de empleo IT español. El "token" acá es una lista de keywords
+  # separadas por coma (no un slug de empresa) -- ver jobwatch/adapters/tecnoempleo.py
+  - company: Tecnoempleo
+    ats: tecnoempleo
+    token: "vue,vue.js,react native,frontend,node.js"
+
   # Ejemplos a probar / verificar vos mismo (no confirmados):
   # - company: NombreEmpresa
   #   ats: lever
