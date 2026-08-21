@@ -64,14 +64,12 @@ def score(job: Job, cfg: MatchConfig) -> int:
 
     title_text = _title_haystack(job)
     title_stack_score = sum(weight for keyword, weight in cfg.stack.items() if keyword in title_text)
-    if title_stack_score == 0:
-        # The job title/department itself carries no technical stack signal ->
-        # not a relevant role for this profile, regardless of what boilerplate
-        # tech mentions show up buried in the full description.
-        return 0
 
     text = _full_haystack(job)
     stack_score = sum(weight for keyword, weight in cfg.stack.items() if keyword in text)
+    if title_stack_score == 0 and stack_score == 0:
+        # No stack signal anywhere (title or description) -> not relevant.
+        return 0
 
     total = stack_score
     for bucket in (cfg.seniority, cfg.geo):
@@ -109,6 +107,11 @@ def is_stale(job: Job, cfg: MatchConfig) -> bool:
     return age_days > cfg.stale_after_days
 
 
+def _has_title_signal(job: Job, cfg: MatchConfig) -> bool:
+    title_text = _title_haystack(job)
+    return any(keyword in title_text for keyword in cfg.stack)
+
+
 def classify(job: Job, cfg: MatchConfig) -> str:
     """Returns 'immediate', 'digest', 'ignore', 'excluded', or 'too_old'."""
     s = score(job, cfg)
@@ -117,6 +120,12 @@ def classify(job: Job, cfg: MatchConfig) -> str:
     if is_too_old(job, cfg):
         return "too_old"
     if s >= cfg.immediate_threshold:
+        if not _has_title_signal(job, cfg):
+            # Stack signal only came from the (often boilerplate) description,
+            # not the title -- likely a false positive (e.g. Sales/Legal/ML
+            # role at a company that "builds with React"). Cap it at digest
+            # instead of interrupting with an immediate email.
+            return "digest"
         # A strong match that's gotten stale gets demoted to the daily digest
         # instead of being dropped outright -- still worth applying to if it's
         # still open, just not urgent enough to interrupt you.
