@@ -100,9 +100,10 @@ class Store:
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
                     ON CONFLICT(uid) DO UPDATE SET
                         last_seen = excluded.last_seen,
-                        active = 1
+                        active = 1,
+                        token = excluded.token
                     """,
-                    (job.uid, job.ats, job.token, job.company, job.title, job.location, job.url, posted_at_iso, now, now),
+                    (job.uid, job.ats, token, job.company, job.title, job.location, job.url, posted_at_iso, now, now),
                 )
 
             for uid in closed_uids:
