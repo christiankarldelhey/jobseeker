@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from . import ashby, greenhouse, lever, personio, recruitee, smartrecruiters, tecnoempleo, workable
+from . import ashby, greenhouse, lever, manfred, personio, recruitee, smartrecruiters, tecnoempleo, workable
 
 ADAPTERS = {
     "greenhouse": greenhouse,
@@ -13,6 +13,7 @@ ADAPTERS = {
     "smartrecruiters": smartrecruiters,
     "personio": personio,
     "tecnoempleo": tecnoempleo,
+    "manfred": manfred,
 }
 
 

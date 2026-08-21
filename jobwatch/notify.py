@@ -85,15 +85,31 @@ def _job_html(job: Job, score: int) -> str:
     )
 
 
-def send_batch(jobs_with_scores: list[tuple[Job, int]]) -> None:
-    """Sends ONE email with every new immediate-score job found in this run.
-    Does nothing if the list is empty -- no email gets sent when there's
-    nothing new."""
-    if not jobs_with_scores:
+def send_batch(jobs_with_scores: list[tuple[Job, int]], alerts: list[str] | None = None) -> None:
+    """Sends ONE email with every new immediate-score job found in this run,
+    plus an operational-alerts section (e.g. a source that broke/started
+    returning nothing) if any were raised. Does nothing if both are empty --
+    no email gets sent when there's nothing new and nothing broken."""
+    alerts = alerts or []
+    if not jobs_with_scores and not alerts:
         return
-    subject = f"[JobWatch] {len(jobs_with_scores)} oferta(s) nueva(s)"
-    items = "".join(_job_html(job, score) for job, score in jobs_with_scores)
-    body = f"<ul>{items}</ul>"
+
+    parts = []
+    if alerts:
+        alert_items = "".join(f"<li>{a}</li>" for a in alerts)
+        parts.append(f"<h3 style='color:#c0392b'>⚠️ Alertas operativas</h3><ul>{alert_items}</ul>")
+    if jobs_with_scores:
+        job_items = "".join(_job_html(job, score) for job, score in jobs_with_scores)
+        parts.append(f"<ul>{job_items}</ul>")
+    body = "".join(parts)
+
+    if jobs_with_scores and alerts:
+        subject = f"[JobWatch] {len(jobs_with_scores)} oferta(s) nueva(s) + {len(alerts)} alerta(s)"
+    elif jobs_with_scores:
+        subject = f"[JobWatch] {len(jobs_with_scores)} oferta(s) nueva(s)"
+    else:
+        subject = f"[JobWatch] {len(alerts)} alerta(s) operativa(s)"
+
     _send(subject, body)
 
 

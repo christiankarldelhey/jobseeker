@@ -138,3 +138,39 @@ class Store:
         with self._connect() as conn:
             conn.row_factory = sqlite3.Row
             return conn.execute("SELECT * FROM runs ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+
+    def consecutive_failures(self, ats: str, token: str, limit: int = 20) -> int:
+        """Counts how many of the most recent runs for this (ats, token) failed
+        in a row, stopping at the first success. Used to alert only on a
+        sustained break (e.g. a site redesign) rather than a single transient
+        network blip."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT ok FROM runs WHERE ats = ? AND token = ? ORDER BY id DESC LIMIT ?",
+                (ats, token, limit),
+            ).fetchall()
+        streak = 0
+        for (ok,) in rows:
+            if ok:
+                break
+            streak += 1
+        return streak
+
+    def consecutive_empty_results(self, ats: str, token: str, limit: int = 20) -> int:
+        """Counts how many of the most recent SUCCESSFUL runs for this
+        (ats, token) returned zero jobs in a row. Catches silent breakage
+        (e.g. an HTML-scraping adapter whose selectors stop matching after a
+        site redesign, without raising an exception)."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT ok, n FROM runs WHERE ats = ? AND token = ? ORDER BY id DESC LIMIT ?",
+                (ats, token, limit),
+            ).fetchall()
+        streak = 0
+        for ok, n in rows:
+            if not ok:
+                break
+            if n > 0:
+                break
+            streak += 1
+        return streak

@@ -77,6 +77,12 @@ companies:
     ats: tecnoempleo
     token: "vue,vue.js,react native,frontend,node.js"
 
+  # Manfred también es un buscador de empleo (no un ATS por empresa) --
+  # mismo esquema de token que Tecnoempleo. Ver jobwatch/adapters/manfred.py
+  - company: Manfred
+    ats: manfred
+    token: "vue,react,react native,frontend,node,typescript"
+
   # Ejemplos a probar / verificar vos mismo (no confirmados):
   # - company: NombreEmpresa
   #   ats: lever

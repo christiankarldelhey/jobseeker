@@ -44,8 +44,13 @@ def main() -> int:
         print(f"[warn] notify module unavailable: {exc}", file=sys.stderr)
         notify_enabled = False
 
+    # Consecutive-failure threshold before flagging a source as broken in the
+    # email -- avoids alerting on a single transient network hiccup.
+    FAILURE_ALERT_THRESHOLD = 2
+
     immediate_items: list[tuple[Job, int]] = []
     digest_items: list[tuple[Job, int]] = []
+    alerts: list[str] = []
 
     for entry in registry:
         company = entry["company"]
@@ -58,9 +63,24 @@ def main() -> int:
         except (AdapterError, ValueError) as exc:
             print(f"[error] {company} ({ats}:{token}): {exc}", file=sys.stderr)
             store.record_run(ats, token, ok=False, n=0, error=str(exc))
+            streak = store.consecutive_failures(ats, token)
+            if streak >= FAILURE_ALERT_THRESHOLD:
+                alerts.append(
+                    f"{company} ({ats}:{token}) lleva {streak} corridas seguidas fallando. "
+                    f"Último error: {exc}"
+                )
             continue
 
         store.record_run(ats, token, ok=True, n=len(jobs))
+        if len(jobs) == 0:
+            empty_streak = store.consecutive_empty_results(ats, token)
+            if empty_streak >= FAILURE_ALERT_THRESHOLD:
+                alerts.append(
+                    f"{company} ({ats}:{token}) lleva {empty_streak} corridas seguidas "
+                    f"devolviendo 0 ofertas -- puede que el sitio haya cambiado y el "
+                    f"adapter dejó de encontrar resultados en silencio."
+                )
+
         diff = store.diff_and_update(ats, token, jobs)
 
         for job in diff.new_jobs:
@@ -78,15 +98,19 @@ def main() -> int:
         if diff.closed_uids:
             print(f"[closed] {company}: {len(diff.closed_uids)} offer(s) no longer listed")
 
-    if immediate_items and notify_enabled:
+    if (immediate_items or alerts) and notify_enabled:
         try:
-            notify.send_batch(immediate_items)
+            notify.send_batch(immediate_items, alerts=alerts)
             for job, s in immediate_items:
                 store.mark_notified(job.uid, s)
         except Exception as exc:
             print(f"[error] failed to send batch email: {exc}", file=sys.stderr)
 
-    print(f"Done. {len(immediate_items)} immediate job(s) ({'1 email sent' if immediate_items else 'no email sent'}), {len(digest_items)} queued for digest.")
+    print(
+        f"Done. {len(immediate_items)} immediate job(s), {len(alerts)} alert(s) "
+        f"({'email sent' if (immediate_items or alerts) else 'no email sent'}), "
+        f"{len(digest_items)} queued for digest."
+    )
     return 0
 
 
